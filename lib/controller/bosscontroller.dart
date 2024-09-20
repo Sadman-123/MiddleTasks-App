@@ -10,6 +10,7 @@ class Bosscontroller extends GetxController {
   TextEditingController loginname = TextEditingController();
   TextEditingController loginpass = TextEditingController();
   TextEditingController todoadd = TextEditingController();
+  TextEditingController updatetodo=TextEditingController();
   RxList<dynamic> arr = <dynamic>[].obs;
   RxBool isLoading=true.obs;
   String token = "";
@@ -85,18 +86,6 @@ class Bosscontroller extends GetxController {
           dismissDirection: DismissDirection.horizontal);
     }
   }
-  Future<void> Get_Todos() async {
-    var url = Uri.parse("https://middle-tasks.vercel.app/read_todo");
-    var res = await http.get(url, headers: {'Authorization': 'Bearer $token'});
-    if (res.statusCode == 200) {
-      isLoading.value=false;
-      var data = jsonDecode(res.body);
-      arr.assignAll(data);
-      print(data['task']);
-    } else {
-      print("Error");
-    }
-  }
   Future<void> Add_to_todo(BuildContext context) async {
     var dat = {
       "task": todoadd.text,
@@ -113,6 +102,36 @@ class Bosscontroller extends GetxController {
       Navigator.of(context).pop();
     } else {
       Get.snackbar("Error", "Adding Todo Failed");
+    }
+  }
+  Future<void> Get_Todos() async {
+    var url = Uri.parse("https://middle-tasks.vercel.app/read_todo");
+    var res = await http.get(url, headers: {'Authorization': 'Bearer $token'});
+    if (res.statusCode == 200) {
+      isLoading.value=false;
+      var data = jsonDecode(res.body);
+      arr.assignAll(data);
+      print(data['task']);
+    } else {
+      print("Error");
+    }
+  }
+  Future<void> Update_from_todo(BuildContext context,String idx) async {
+    var dat={
+      "task":updatetodo.text
+    };
+    var url = Uri.parse("https://middle-tasks.vercel.app/update_todo/$idx");
+    var res = await http.put(url, headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+      'Authorization': 'Bearer $token',
+    },body: json.encode(dat));
+    if (res.statusCode == 200) {
+      Get.snackbar("Success", "Updated Successfully",dismissDirection: DismissDirection.horizontal,backgroundColor: Colors.green.shade400);
+      updatetodo.clear();
+      Get_Todos();
+      Navigator.of(context).pop();
+    } else {
+      Get.snackbar("Error", "Error While Update");
     }
   }
   Future<void> Delete_from_todo(String idx) async {
@@ -135,5 +154,14 @@ class Bosscontroller extends GetxController {
     isLoading.value=true;
     arr.clear();
     Get.offAll(() => Login(),transition: Transition.cupertino);
+  }
+  @override
+  void dispose() {
+    loginname.dispose();
+    loginpass.dispose();
+    updatetodo.dispose();
+    todoadd.dispose();
+    regname.dispose();
+    regpass.dispose();
   }
 }

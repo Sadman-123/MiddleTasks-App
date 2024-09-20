@@ -55,6 +55,39 @@ class Todo extends StatelessWidget{
               return ListView.separated(
                   itemBuilder: (context, index) {
                     return ListTile(
+                      onLongPress: (){
+                        showDialog<void>(
+                          context: context,
+                          builder: (BuildContext dialogContext) {
+                            return AlertDialog(
+                              title: Text('Update Todo'),
+                              content: Container(
+                                child: TextField(
+                                  controller: controller.updatetodo,
+                                  decoration: InputDecoration(
+                                      hintText: "${controller.arr[index]['task']}"
+                                  ),
+                                ),
+                              ),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text('Update Todo'),
+                                  onPressed: () {
+                                    controller.Update_from_todo(context,controller.arr[index]['_id']);
+                                  },
+                                ),
+                                TextButton(
+                                  child: Text('close'),
+                                  onPressed: () {
+                                    Navigator.of(dialogContext)
+                                        .pop();
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      },
                       trailing: IconButton(onPressed: (){controller.Delete_from_todo(controller.arr[index]['_id']);}, icon: Icon(Icons.delete)),
                       title: Text("${controller.arr[index]['task']}",style: TextStyle(fontSize: mdw*0.05,fontWeight: FontWeight.bold),),);
                   },
